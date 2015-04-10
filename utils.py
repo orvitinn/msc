@@ -100,7 +100,7 @@ def SimpleScaleRotate(image, angle):
     rotated_image = image.rotate(angle)
     return rotated_image
 
-def CropFace(image, face, eye_left=(0,0), eye_right=(0,0), offset_pct=(0.2,0.2), dest_sz = (70,70)):
+def CropFace2(image, face, eye_left=(0,0), eye_right=(0,0), offset_pct=(0.2,0.2), dest_sz = (70,70)):
     # calculate offsets in original image
     offset_h = math.floor(float(offset_pct[0])*dest_sz[0])
     offset_v = math.floor(float(offset_pct[1])*dest_sz[1])
@@ -138,7 +138,7 @@ def CropFace(image, face, eye_left=(0,0), eye_right=(0,0), offset_pct=(0.2,0.2),
     # image = image.resize(dest_sz, Image.ANTIALIAS)
     return image
 
-def CropFace2(image, face, eye_left=(0,0), eye_right=(0,0), offset_pct=(0.2,0.2), dest_sz = (70,70)):
+def CropFace(image, eye_left=(0,0), eye_right=(0,0), offset_pct=(0.2,0.2), dest_sz = (70,70)):
     # calculate offsets in original image
     offset_h = math.floor(float(offset_pct[0])*dest_sz[0])
     offset_v = math.floor(float(offset_pct[1])*dest_sz[1])
@@ -158,7 +158,7 @@ def CropFace2(image, face, eye_left=(0,0), eye_right=(0,0), offset_pct=(0.2,0.2)
     crop_xy = (eye_left[0] - scale*offset_h, eye_left[1] - scale*offset_v)
     crop_size = (dest_sz[0]*scale, dest_sz[1]*scale)
     image = image.crop((int(crop_xy[0]), int(crop_xy[1]), int(crop_xy[0]+crop_size[0]), int(crop_xy[1]+crop_size[1])))
-    image.load()
+    image = image.resize(dest_sz, Image.ANTIALIAS)
     return image
 
 class FaceDetector(object):
@@ -167,14 +167,46 @@ class FaceDetector(object):
         self.eyes_cascade = cv2.CascadeClassifier("/opt/local/share/OpenCV/haarcascades/haarcascade_eye_tree_eyeglasses.xml")
 
     # find a face, return the box for the face and points for left and right eye    # (face, left_eye, right_eye)    
-    def detectFace(self, image):    	
+    def detectFace(self, image):
         faces = self.face_cascade.detectMultiScale(img, 1.1, 4, cv2.cv.CV_HAAR_SCALE_IMAGE, (20,20))
         eyes = None
         if len(faces) > 0:
             eyes = self.eyes_cascade.detectMultiScale(img, 1.1, 4, cv2.cv.CV_HAAR_SCALE_IMAGE, (20,20))
-        print "f:", faces
-        print "e:", eyes
+        # print "f:", faces
+        # print "e:", eyes
         return faces, eyes
+
+
+
+class FaceProcessor(object):
+    def __init__(self):
+        self.faceDector = FaceDetector()
+
+    def process_image(self, image):
+        """Processes and crops an image containg a Face
+
+        Args:
+            image: an opencv image object containing a Face
+        Returns:
+            if a face (and eyes) are found
+            a new image converted to bw, rotated, cropped and resize
+            around the face
+            otherwise returns None
+        """
+        img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        faces, eyes = self.faceDector.detectFace(img)
+        for face in faces:
+            x, y, h, w = face
+            if len(eyes) > 0:
+                right_eye, left_eye = eyes[0], eyes[1]
+                x, y, w, h = left_eye
+                left_eye_center = (x+(w/2), y+(h/2))
+                x, y, w, h = right_eye
+                right_eye_center = (x+(w/2), y+(h/2))
+                crop_face = CropFace(img, left_eye_center, right_eye_center)
+                return np.array(crop_face)
+            else:
+                return None
 
 
 if __name__ == "__main__":
@@ -184,17 +216,21 @@ if __name__ == "__main__":
     # img = cv2.imread(path + "matti.bmp")
     img = cv2.imread(path + "ég2.jpg")
     # convert to bw
-    img.convert('L')
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # convert histogram
 
-    print type(img)
+    fp = FaceProcessor()
+    img = fp.process_image(img)
+    cv2.imshow("Faces found", img)
+    cv2.waitKey(0)
+    """
     fd = FaceDetector()
     faces, eyes = fd.detectFace(img)
     for face in faces:
         x, y, h, w = face
-        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
-        for x, y, h, w in eyes:
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        # for x, y, h, w in eyes:
+        #     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
         if len(eyes) > 0:
             right_eye, left_eye = eyes[0], eyes[1]
             print "left: ", left_eye, "right: ", str(right_eye)
@@ -204,14 +240,13 @@ if __name__ == "__main__":
             right_eye_center = (x+(w/2), y+(h/2))
             print "l ", left_eye_center
             print "r ", right_eye_center
-            cv2.line(img, left_eye_center, right_eye_center, (255, 0, 0))
-            # face = faces[0]
-            # crop_face = CropFace(img, face, left_eye_center, right_eye_center)
-            crop_face = CropFace2(img, face, left_eye_center, right_eye_center)
+            # cv2.line(img, left_eye_center, right_eye_center, (255, 0, 0))
+            crop_face = CropFace(img, left_eye_center, right_eye_center)
             cv2.imshow("Faces found", np.array(crop_face))
             cv2.waitKey(0)
         else:
             cv2.imshow("Faces found", img)
             cv2.waitKey(0)
-    # crop the face
-    # show
+        # crop the face
+        # show
+    """
