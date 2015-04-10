@@ -209,6 +209,18 @@ class FaceProcessor(object):
                 return None
 
 
+def convert_all_files_in_folder(folder, destination):
+    """Batch process images
+
+    Args:
+        a folder containing images
+    Returns:
+        for each image contating a face a new
+        image with a processed (cropped, rotated, scaled) face
+        is saved in the destination folder
+    """
+
+
 if __name__ == "__main__":
     # load image and find the face
     # path = '/Users/matti/Documents/forritun/att_faces/'
@@ -223,6 +235,7 @@ if __name__ == "__main__":
     img = fp.process_image(img)
     cv2.imshow("Faces found", img)
     cv2.waitKey(0)
+
     """
     fd = FaceDetector()
     faces, eyes = fd.detectFace(img)
