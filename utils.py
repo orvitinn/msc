@@ -141,44 +141,6 @@ def SimpleScaleRotate(image, angle):
     rotated_image = image.rotate(angle)
     return rotated_image
 
-def crop_face2(image, face, eye_left=(0,0), eye_right=(0,0), offset_pct=(0.2,0.2), dest_sz = (70,70)):
-    # calculate offsets in original image
-    offset_h = math.floor(float(offset_pct[0])*dest_sz[0])
-    offset_v = math.floor(float(offset_pct[1])*dest_sz[1])
-    # get the direction
-    eye_direction = (eye_right[0] - eye_left[0], eye_right[1] - eye_left[1])
-    # calc rotation angle in radians
-    rotation = -math.atan2(float(eye_direction[1]), float(eye_direction[0]))
-    # distance between them
-    dist = Distance(eye_left, eye_right)
-    # calculate the reference eye-width
-    reference = dest_sz[0] - 2.0*offset_h
-    # scale factor
-    scale = float(dist)/float(reference)
-    # rotate original around the left eye
-    # cv2.imshow("ScaleRotateTranslate", np.array(image))
-    # cv2.waitKey(0)
-    # print "eye_direction: ", eye_direction, "rotation: ", rotation, ", dist: ", dist, ", reference: ", reference, ", scale: ", scale
-    # image = ScaleRotateTranslate(image, center=eye_left, angle=rotation)
-    # image = SimpleScaleRotate(image, rotation)
-    # cv2.imshow("ScaleRotateTranslate", np.array(image))
-    # cv2.waitKey(0)
-    # crop the rotated image
-    crop_xy = (eye_left[0] - scale*offset_h, eye_left[1] - scale*offset_v)
-    crop_size = (dest_sz[0]*scale, dest_sz[1]*scale)
-    # print "crop: ", crop_xy, "crop_size: ", crop_size
-    # image = image.crop((int(crop_xy[0]), int(crop_xy[1]), int(crop_xy[0]+crop_size[0]), int(crop_xy[1]+crop_size[1])))
-    tmp = Image.fromarray(image)
-
-    image = tmp.crop((int(crop_xy[0]), int(crop_xy[1]), int(crop_xy[0]+crop_size[0]), int(crop_xy[1]+crop_size[1])))
-    # image = tmp.crop((face[0], face[1], face[0]+face[2], face[1]+face[3]))
-    image.load()
-    # resize it
-    # image = SimpleScaleRotate(image, rotation)
-    image = image.rotate(math.degrees(-rotation))
-    # image = image.resize(dest_sz, Image.ANTIALIAS)
-    return image
-
 
 def crop_face(image, eye_left=(0,0), eye_right=(0,0), offset_pct=(0.2,0.2), dest_sz=(90,90)):
     # calculate offsets in original image
