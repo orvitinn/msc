@@ -68,17 +68,17 @@ def read_images_from_single_folder(path):
     res = []
     for filename in os.listdir(path):
         try:
-            if filename == ".DS_Store" or not filename.endswith(".png"):
-                continue
-            im = cv2.imread(os.path.join(path, filename), cv2.CV_LOAD_IMAGE_GRAYSCALE)
-            id, i, _ = re.split("\D+", filename)
-            id, i = int(id), int(i)
-            res.append((id, im))
+            if filename.endswith(".png"):
+                im = cv2.imread(os.path.join(path, filename), cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                id, i, _ = re.split("\D+", filename)
+                id, i = int(id), int(i)
+                res.append((id, im))
         except ValueError, e:
             print "Error reading filename: ", path, "/", filename
         except IOError, e:
             print "Error opening file: ", filename
     return res
+
 
 def read_processed_images_from_single_folder(path):
     # lesum inn myndaskrár úr einum folder, nöfn mynda innihalda id og númer.
