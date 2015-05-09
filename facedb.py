@@ -55,6 +55,7 @@ def threshold_function(threshold_majority, threshold_unique):
         distances = res[1]['distances']
         labels = res[1]['labels']
 
+        best_result = min(distances)
         unique_labels = set(labels)
         if len(unique_labels) == 1:
             return suggested_result
@@ -67,12 +68,12 @@ def threshold_function(threshold_majority, threshold_unique):
             if best_suggested_distance < threshold_unique:
                 return suggested_result
         else:
+            # aðeins meiri slaki ef það voru tvær eins niðurstöður
             if best_suggested_distance < threshold_majority:
                 return suggested_result
 
-        # var besta suggested ekki það sama og besta, var besta betra?
-        best_result = min(distances)
-        if best_result < best_suggested_distance:
+        # var sú sem reiknirit mælti með kannski ekki besta niðurstaða?
+        if best_result < best_suggested_distance and best_result < threshold_unique:
             return labels[np.where(distances == best_result)[0]][0]
 
         return -1
@@ -139,15 +140,6 @@ class FaceDatabase(object):
             metric_param = d[metric]()
         else:
             metric_param = ChiSquareDistance()
-
-        # Define a 1-NN classifier with Euclidean Distance:
-        # classifier = NearestNeighbor(dist_metric=EuclideanDistance(), k=3)
-        # classifier = NearestNeighbor(dist_metric=CosineDistance(), k=3)
-        # classifier = NearestNeighbor(dist_metric=NormalizedCorrelation(),
-        # classifier = NearestNeighbor(dist_metric=ChiSquareDistance(), k=3)
-        # classifier = NearestNeighbor(dist_metric=HistogramIntersection(), k=3)
-        # classifier = NearestNeighbor(dist_metric=L1BinRatioDistance(), k=3)
-        # classifier = NearestNeighbor(dist_metric=ChiSquareBRD(), k=3)
 
         classifier = NearestNeighbor(dist_metric=metric_param, k=k)
         feature = ChainOperator(TanTriggsPreprocessing(), feature)

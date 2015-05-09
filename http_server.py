@@ -69,6 +69,7 @@ class Handler(BaseHTTPRequestHandler):
                     return
 
             res = fdb.find_face(face_image)
+            print "returning: ", res
             # self.wfile.write('{{"result": {} }}'.format(res))
             self.wfile.write(json.dumps({"result": res}))
             # now read the image from image_output into opencv

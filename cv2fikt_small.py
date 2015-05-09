@@ -79,7 +79,7 @@ while(True):
     else:
         boxcolor = green
 
-    faces = face_cascade2.detectMultiScale(frame, 1.3, 5)
+    faces = face_cascade2.detectMultiScale(frame, 1.2, 5, 0, (300, 300), (400, 400))
     for (x, y, w, h) in faces:
         found_face = True
         # finna augu
