@@ -132,12 +132,10 @@ def ScaleRotateTranslate(image, angle, center=None, new_center=None, scale=None,
     e = cosine/sy
     f = y-nx*d-ny*e
     tmp = Image.fromarray(image)
-    # return image.transform(image.size, Image.AFFINE, (a,b,c,d,e,f), resample=resample)
     return tmp.transform(tmp.size, Image.AFFINE, (a,b,c,d,e,f), resample=resample)
 
 
 def SimpleScaleRotate(image, angle):
-    # tmp = Image.fromarray(image)
     rotated_image = image.rotate(angle)
     return rotated_image
 
@@ -150,15 +148,11 @@ def crop_face(image, eye_left=(0,0), eye_right=(0,0), offset_pct=(0.2,0.2), dest
     eye_direction = (eye_right[0] - eye_left[0], eye_right[1] - eye_left[1])
     # calc rotation angle in radians
     rotation = -math.atan2(float(eye_direction[1]), float(eye_direction[0]))
-    # if rotation > 10:
-    # distance between them
     dist = Distance(eye_left, eye_right)
     # calculate the reference eye-width
     reference = dest_sz[0] - 2.0*offset_h
     # scale factor
     scale = float(dist)/float(reference)
-    # rotate original around the left eye
-    # print "rotation: ", rotation, ", dist: ", dist
     if 0.01 < math.fabs(rotation) < 0.3:
         image = ScaleRotateTranslate(image, center=eye_left, angle=rotation)
     else:

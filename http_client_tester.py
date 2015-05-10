@@ -24,6 +24,10 @@ def test_face(path, img, process=True):
 
 if __name__ == "__main__":
     test_face('/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/test_faces_02/', '10.png', process=False)
+    test_face('/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/test_faces_02/', '8_7.png', process=False)
+    test_face('/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/test_faces_02/', '48_3.png', process=False)
+    test_face('/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/test_faces_02/', '40_1.png', process=False)
+    test_face('/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/test_faces_02/', '0455.png', process=False)
     test_face('/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/sull/', 'simi_t1.jpg')
     test_face('/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/sull/', 'simi_t2.jpg')
     test_face('/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/sull/', 'simi_t3.jpg')

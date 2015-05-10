@@ -58,7 +58,10 @@ def threshold_function(threshold_majority, threshold_unique):
         best_result = min(distances)
         unique_labels = set(labels)
         if len(unique_labels) == 1:
-            return suggested_result
+            if any(x < threshold_majority for x in distances):
+                return suggested_result
+            else:
+                return -1
 
         indexes = np.where(labels == suggested_result)[0]
         best_suggested_distance = abs(min([distances[i] for i in indexes]))
@@ -143,6 +146,7 @@ class FaceDatabase(object):
 
         classifier = NearestNeighbor(dist_metric=metric_param, k=k)
         feature = ChainOperator(TanTriggsPreprocessing(), feature)
+        # feature = ChainOperator(TanTriggsPreprocessing(0.1, 10.0, 1.0, 3.0), feature)
         self.model = PredictableModel(feature, classifier)
 
         # images in one list, id's on another

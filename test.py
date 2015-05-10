@@ -15,6 +15,7 @@ import os
 import utils
 from facedb import FaceDatabase
 
+
 def test_processing():
     # load images
     image_list = utils.read_images('/Users/matti/Documents/forritun/andlit2/')
@@ -67,6 +68,7 @@ def test_one_face(target):
     assert image2 is not None, "Mynd á ekki að vera null"
     utils.show_image_and_wait_for_input(image2)
     print "done"
+    return image2
 
 def test_failed_face():
     test_one_face('6.bmp' )
@@ -137,16 +139,21 @@ def test_compare_images(img1_filename, img2_filename):
 
 def test_tanprocessing(filename):
     from facerec.preprocessing import TanTriggsPreprocessing
-    path = '/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/test_faces_02'
+    path = '/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/sull'
     image = cv2.imread(os.path.join(path, filename))
     utils.show_image_and_wait_for_input(image)
+    # alpha = 0.1, tau = 10.0, gamma = 0.2, sigma0 = 1.0, sigma1 = 2.0):
+    t = TanTriggsPreprocessing(0.1, 10, 1.0, 3.0)
+    res = t.extract(image)
+    utils.show_image_and_wait_for_input(res)
+
     t = TanTriggsPreprocessing()
     res = t.extract(image)
     utils.show_image_and_wait_for_input(res)
 
 def test_face_database():
     fdb = FaceDatabase("/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/tmp8", "LPQ")
-    img = utils.read_image("/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/test_faces_02/3078.png")
+    img = utils.read_image("/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/test_faces_02/3078.png")
     print "find_face returned: ", fdb.find_face(img)
 
 
@@ -158,6 +165,44 @@ def test_base64png():
     utils.show_image_and_wait_for_input(img2)
 
 
+def show_process_steps_of_one_picture(target):
+    """ processes a picture display an display an image after every step """
+    # prófum þetta, finnst andlit í einfaldri mynd?
+    # path = '/Users/matti/Documents/forritun/andlit2/s41'
+    # path = '/Volumes/MacSarpur/Downloads/colorferet/colorferet/dvd1/data/images/s/s00001'
+    path = '/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/sull'
+    #path = '/Users/matti/Pictures/'
+    # img = cv2.imread(path + "matti.bmp")
+    # target = "ég2.jpg"
+    image = cv2.imread(os.path.join(path, target))
+    if image is None:
+        print "Gat ekki lesið mynd"
+        return
+
+    image = utils.check_size_and_resize(image)
+
+    df = utils.FaceDetector()
+    face, eyes = df.detectFace(image)
+    if face is None or len(face) == 0:
+        print "Fann ekkert andlit í mynd: ", target
+        utils.show_image_and_wait_for_input(image)
+        return
+
+    face = face[0]
+    print "f:",face, "e:", eyes
+    image2 = image.copy()
+    utils.draw_face(image2, face, eyes)
+    utils.show_image_and_wait_for_input(image2)
+    fp = utils.FaceProcessor()
+    image2 = fp.process_image(image)
+    assert image2 is not None, "Mynd á ekki að vera null"
+    utils.show_image_and_wait_for_input(image2)
+    print "done"    
+    img = cv2.imread(path_to_picture)
+    utils.show_image_and_wait_for_input(img)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    utils.show_image_and_wait_for_input(img)
+
 if __name__ == "__main__":
     # check_histogram()
     # check_processed_image()
@@ -166,17 +211,24 @@ if __name__ == "__main__":
     # test_failed_face()
     # test_reading_from_single_folder()
 
+    # show_process_steps_of_one_picture('/Users/matti/Dropbox/Skjöl/Meistaraverkefni/sull/3078.jpg')
+
     # test_draw()
-    # test_tanprocessing('0455 .png')
+    # test_tanprocessing('10.png')
     # test_face_database()
     # test_base64png()
 
-    test_one_face('simi_t1.jpg')
-    test_one_face('simi_t2.jpg')
-    test_one_face('simi_t3.jpg')
-    test_one_face('simi_t4.jpg')
+    mynd = test_one_face('simi_t1.jpg')
+    from facerec.preprocessing import TanTriggsPreprocessing    
+    t = TanTriggsPreprocessing(0.1, 10, 1.0, 3.0)
+    res = t.extract(mynd)
+    utils.show_image_and_wait_for_input(res)
+
+    # test_one_face('simi_t2.jpg')
+    # test_one_face('simi_t3.jpg')
+    # test_one_face('simi_t4.jpg')
     # test_one_face('gyda_03.jpg')
-    # test_one_face('gyda_05.jpg')
+    # test_one_face('3078.jpg')
     #test_compare_images(
     #    '/Users/matti/Documents/forritun/att_faces/arora_01.jpg', 
     #    '/Users/matti/Dropbox/Skjöl/Meistaraverkefni/server/test_faces_to_search_for/arora_01.png'

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, os
+
 # import facerec modules
 from facerec.feature import Fisherfaces
 from facerec.feature import PCA
@@ -12,17 +12,25 @@ from facerec.distance import EuclideanDistance
 from facerec.classifier import NearestNeighbor
 from facerec.model import PredictableModel
 from facerec.validation import KFoldCrossValidation
-from facerec.visual import subplot
+# from facerec.visual import subplot
 from facerec.util import minmax_normalize
 
 # import numpy, matplotlib and logging
 import numpy as np
 from PIL import Image
 # import matplotlib.cm as cm
+import cv2
+
 import logging
 import time
 import random
+import sys
+import os
 
+import utils
+
+
+'''
 def read_images(path, sz=None):
     """Reads the images in a given folder, resizes images on the fly if size is given.
 
@@ -37,7 +45,7 @@ def read_images(path, sz=None):
             y: The corresponding labels (the unique number of the subject, person) in a Python list.
     """
     # c = 0
-    X,y = [], []
+    X, y = [], []
     for dirname, dirnames, filenames in os.walk(path):
         for subdirname in dirnames:
             if not subdirname.startswith("s"):
@@ -65,7 +73,8 @@ def read_images(path, sz=None):
                     raise
             print i, " images."
             # c = c+1
-    return [X,y]
+    return [X, y]
+'''
 
 if __name__ == "__main__":
     print "starting...."
@@ -77,13 +86,13 @@ if __name__ == "__main__":
     # the tutorial coming with this source code on how to prepare
     # your image data:
     path = '/Users/matti/Documents/forritun/att_faces/'
-    if len(sys.argv) == 2:
+    if len(sys.argv) > 1:
         path = sys.argv[1]
 
     print "reading images from " + path
     # Now read in the image data. This must be a valid path!
-    [X,y] = read_images(path)
-
+    # [X, y] = read_images(path)
+    input_faces = utils.read_images(path)
 
     # use a random image
     # random.seed()
@@ -95,10 +104,10 @@ if __name__ == "__main__":
     prufu_mynd = None
 
     # test data and label
-    ## prufu_mynd, tl = X[random_index], y[random_index]
+    # prufu_mynd, tl = X[random_index], y[random_index]
     # and remove test from the data
-    ## del X[random_index]
-    ## del y[random_index]
+    # del X[random_index]
+    # del y[random_index]
 
     # Then set up a handler for logging:
     handler = logging.StreamHandler(sys.stdout)
@@ -110,16 +119,16 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     # Define the Fisherfaces as Feature Extraction method:
 
-    #default
+    # default
     feature = Fisherfaces()
 
     if len(sys.argv) > 2:
         feature_parameter = sys.argv[2]
         m = {
-          "fisher" : Fisherfaces,
-          "pca" : PCA,
-          # "lda" : LDA,
-          "spatial" : SpatialHistogram
+          "fisher": Fisherfaces,
+          "pca": PCA,
+          "lda": LDA,
+          "spatial": SpatialHistogram
         }
 
         if feature_parameter in m:
@@ -130,39 +139,48 @@ if __name__ == "__main__":
     # Define the model as the combination
     model = PredictableModel(feature=feature, classifier=classifier)
     # Compute the model on the given data (in X) and labels (in y):
+
+    print "processing input images, ", len(input_faces)
+    input_faces = utils.convert_all_files(input_faces)
+    #  remove null faces
+    # input_faces = [(a, b) for a, b in input_faces if b is not None]
+    print "nulls removed, ", len(input_faces)
+
+    # images in one list, id's on another
+    id_list, face_list = zip(*input_faces)
+
+    # print "saving images"
+    # utils.save_images(face_list)
+
+    # show random image
+    # utils.show_image_and_wait_for_input(face_list[len(face_list)/2])
+
     print "Train the model"
     start = time.clock()
-    model.compute(X, y)
+    # model.compute(X, y)
+    model.compute(face_list, id_list)
     stop = time.clock()
     print "Training done in", stop-start, " next...find a face"
 
-    target = "matti.bmp"
+    target = "10.bmp"
     if len(sys.argv) > 3:
         target = sys.argv[3]
 
-    while target != "quit":
-       prufu_mynd = Image.open(os.path.join(path, target))
-       print "Nota mynd: ", target
-       start = time.clock()
-       # res = model.predict(td)
-       res = model.predict(prufu_mynd)
-       stop = time.clock()
-       print res
-       print "time: ", stop-start
-       target = raw_input("Naesta mynd eda quit:")
+    fp = utils.FaceProcessor()
 
-"""
-    # Then turn the first (at most) 16 eigenvectors into grayscale
-    # images (note: eigenvectors are stored by column!)
-    E = []
-    for i in xrange(min(model.feature.eigenvectors.shape[1], 16)):
-        e = model.feature.eigenvectors[:,i].reshape(X[0].shape)
-        E.append(minmax_normalize(e,0,255, dtype=np.uint8))
-    # Plot them and store the plot to "python_fisherfaces_fisherfaces.pdf"
-    subplot(title="Fisherfaces", images=E, rows=4, cols=4, sptitle="Fisherface", colormap=cm.jet, filename="fisherfaces.png")
-    # Perform a 10-fold cross validation
-    cv = KFoldCrossValidation(model, k=10)
-    cv.validate(X, y)
-    # And print the result:
-    print cv
-"""
+    while target != "quit":
+        # prufu_mynd = Image.open(os.path.join(path, target))
+        prufu_mynd = cv2.imread(os.path.join(path, target))
+        print "Nota mynd: ", os.path.join(path, target)
+        if prufu_mynd is not None:
+            prufu_mynd = fp.process_image(prufu_mynd)
+            if prufu_mynd is None:
+                print "fann ekkert andlit!"
+            else:
+                start = time.clock()
+                # res = model.predict(td)
+                res = model.predict(prufu_mynd)
+                stop = time.clock()
+                print res
+                print "time: ", stop-start
+        target = raw_input("Naesta mynd eda quit:")

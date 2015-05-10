@@ -9,6 +9,7 @@ import thread
 import utils
 import base64
 import json
+import time
 from Queue import Queue
 
 cap = cv2.VideoCapture(0)
@@ -34,6 +35,7 @@ blue = (255, 0, 0)
 green = (0, 255, 0)
 red = (0, 0, 255)
 
+
 # notum queue til að senda svar frá þræði yfir í aðalþráð
 q = Queue()
 
@@ -42,7 +44,9 @@ def test_face(mynd, process=True):
     url = "http://localhost:8080/process/"
     if not process:
         url = "http://localhost:8080/"
+    start = time.clock()
     response = requests.post(url, data={'face': base64.b64encode(data)})
+    print "response in ", time.clock() - start, " seconds."
     print response.text
     result = json.loads(response.text)
     # print result
@@ -59,6 +63,8 @@ def face_worker(face):
 
 i = 0
 id = 0
+STEPS = 10
+
 while(True):
     ret, frame = cap.read()
     # frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
@@ -83,10 +89,10 @@ while(True):
     for (x, y, w, h) in faces:
         found_face = True
         # finna augu
-        # crop = frame[y:y+h/3*2, x:x+w]
-        # eyes = eye_cascade1.detectMultiScale(crop, 1.3, 5)
-        # for x2, y2, w2, h2 in eyes:
-        #     cv2.rectangle(frame, (x+x2, y+y2), (x+x2+w2, y+y2+h2), blue, 1)
+        crop = frame[y:y+h/3*2, x:x+w]
+        eyes = eye_cascade1.detectMultiScale(crop, 1.1, 5, 0, (10, 10), (50, 50))
+        for x2, y2, w2, h2 in eyes:
+             cv2.rectangle(frame, (x+x2, y+y2), (x+x2+w2, y+y2+h2), blue, 1)
 
         # finna nef
         # nose = nose_cascade.detectMultiScale(frame[y:y+h, x:x+w], 1.3, 5)
