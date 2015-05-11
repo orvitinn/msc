@@ -1,6 +1,6 @@
 # Andlitsgreining fyrir stimpilklukku
 
-Skrár sem fylgja meistaraverkefni í tölvunarfræði við Háskóla Íslands. Prótótýpur, test og fikt.
+Skrár sem fylgja meistaraverkefni í tölvunarfræði við Háskóla Íslands. Prótótýpur, test, fikt, hjálparföll og gögn.
 
 ** Ath: hér á ég eftir að taka til og skjala. Þetta er mjög kaótískt eins og er **
 
