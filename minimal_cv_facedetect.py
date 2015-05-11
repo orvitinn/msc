@@ -5,11 +5,11 @@ import cv2
 import os
 
 cap = cv2.VideoCapture(0)
-# cascate_root = '/opt/local/share/OpenCV/haarcascades/'
-cascate_root = '/opt/local/share/OpenCV/lbpcascades/'
+cascate_root = '/opt/local/share/OpenCV/haarcascades/'
+# cascate_root = '/opt/local/share/OpenCV/lbpcascades/'
 
-cascade_name = 'lbpcascade_frontalface.xml'
-# cascade_name = 'haarcascade_frontalface_alt.xml'
+# cascade_name = 'lbpcascade_frontalface.xml'
+cascade_name = 'haarcascade_frontalface_alt.xml'
 face_cascade = cv2.CascadeClassifier(os.path.join(cascate_root, cascade_name))
 
 ret, frame = cap.read()
