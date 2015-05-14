@@ -43,6 +43,7 @@ import os
 import utils
 
 # todo: taka operator inn sem parameter (operator.__lt__ og operator.__gt__)
+
 def threshold_function(threshold_majority, threshold_unique):
     """ fall sem tekur inn stuðla fyrir threshold fall og skilar
         threshold falli sem notar þá stuðla """
