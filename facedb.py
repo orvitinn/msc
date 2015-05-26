@@ -125,7 +125,7 @@ class FaceDatabase(object):
                 self.threshold = threshold_function(0.61, 0.5)
             elif feature_parameter == 'fisher':
                 feature = Fisherfaces()
-                self.threshold = threshold_function(0.5, 0.3)
+                self.threshold = threshold_function(0.61, 0.5)
             elif feature_parameter == 'pca80':
                 feature = PCA(80)
             else:
